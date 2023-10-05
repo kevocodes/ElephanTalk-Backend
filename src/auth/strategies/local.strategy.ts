@@ -19,6 +19,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    console.log('user', user);
     return user;
   }
 }

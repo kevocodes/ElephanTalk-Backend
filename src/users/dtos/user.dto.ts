@@ -5,6 +5,7 @@ export class CreateUserDto {
   @Transform(({ value }) => value.trim())
   @IsString()
   @IsNotEmpty()
+  @MinLength(4)
   readonly username: string;
 
   @IsEmail()
