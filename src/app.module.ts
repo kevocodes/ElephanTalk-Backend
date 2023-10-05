@@ -16,6 +16,7 @@ import appConfig from 'config/app.config';
       validationSchema: Joi.object({
         MONGO_URI: Joi.string().required(),
         PORT: Joi.number().optional(),
+        JWT_SECRET: Joi.string().required(),
       }),
     }),
     DatabaseModule,
