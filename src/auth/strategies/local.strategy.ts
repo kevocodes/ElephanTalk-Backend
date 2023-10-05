@@ -11,7 +11,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
   async validate(username: string, password: string) {
     if (!username || !password) {
-      console.log('username and password are required.');
       throw new UnauthorizedException('username and password are required.');
     }
     const user = await this.authService.validateUser(username, password);
@@ -19,7 +18,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
-    console.log('user', user);
     return user;
   }
 }

@@ -17,7 +17,9 @@ export class AuthController {
   }
 
   @Post('register')
-  register(@Body() payload: CreateUserDto) {
-    return this.userService.create(payload);
+  async register(@Body() payload: CreateUserDto) {
+    return {
+      data: await this.userService.create(payload),
+    };
   }
 }
