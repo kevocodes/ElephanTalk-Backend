@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model } from 'mongoose';
-import { CreateUserDto } from '../dtos/user.dto';
+import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -28,18 +28,15 @@ export class UsersService {
     const hash = await bcrypt.hash(newUser.password, salt);
     newUser.password = hash;
 
-    const result = newUser.save();
-    const { password, ...resultWithoutPassword } = (await result).toJSON();
-
-    return resultWithoutPassword;
-  }
-
-  async findOneByEmail(email: string) {
-    return this.userModel.findOne({ email });
+    return await newUser.save();
   }
 
   async findOneById(id: string) {
     return this.userModel.findById(id);
+  }
+
+  async findOneByEmail(email: string) {
+    return this.userModel.findOne({ email });
   }
 
   async findOneByUsername(username: string) {
@@ -47,19 +44,51 @@ export class UsersService {
   }
 
   async findOneByUsernameOrEmail(usernameOrEmail: string) {
-    return this.userModel.findOne({
-      $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
-    });
+    return this.userModel
+      .findOne({
+        $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+      })
+      .select('+password');
   }
 
   async findAll() {
-    const users = await this.userModel.find();
+    return this.userModel.find();
+  }
 
-    const usersWithoutPassword = users.map((user) => {
-      const { password, ...result } = user.toJSON();
-      return result;
-    });
+  async deleteOneById(id: string) {
+    const user = await this.findOneById(id);
 
-    return usersWithoutPassword;
+    if (!user) {
+      throw new BadRequestException('User not found.');
+    }
+
+    return await this.userModel.deleteOne({ _id: id });
+  }
+
+  async updateOneById(id: string, data: UpdateUserDto) {
+    const user = await this.findOneById(id);
+
+    if (!user) {
+      throw new BadRequestException('User not found.');
+    }
+
+    const emailUser = await this.findOneByEmail(data.email);
+    const usernameUser = await this.findOneByUsername(data.username);
+
+    if (emailUser && emailUser.id != id) {
+      throw new BadRequestException('Email already exists.');
+    }
+
+    if (usernameUser && usernameUser.id != id) {
+      throw new BadRequestException('Username already exists.');
+    }
+
+    const updatedUser = await this.userModel.findOneAndUpdate(
+      { _id: id },
+      { $set: data },
+      { new: true },
+    );
+
+    return updatedUser;
   }
 }
