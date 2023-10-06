@@ -25,6 +25,13 @@ export class UsersController {
     };
   }
 
+  @Get(':id')
+  async findOne(@Param('id', MongoIdPipe) id: string) {
+    return {
+      data: await this.userService.findOneById(id),
+    };g
+  }
+
   @Delete(':id')
   async deleteOne(@Param('id', MongoIdPipe) id: string) {
     return {

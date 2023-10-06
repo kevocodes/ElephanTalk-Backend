@@ -32,7 +32,13 @@ export class UsersService {
   }
 
   async findOneById(id: string) {
-    return this.userModel.findById(id);
+    const user = await this.userModel.findById(id);
+
+    if (!user) {
+      throw new BadRequestException('User not found.');
+    }
+
+    return user;
   }
 
   async findOneByEmail(email: string) {
@@ -56,7 +62,7 @@ export class UsersService {
   }
 
   async deleteOneById(id: string) {
-    const user = await this.findOneById(id);
+    const user = await this.userModel.findById(id);
 
     if (!user) {
       throw new BadRequestException('User not found.');
@@ -66,7 +72,7 @@ export class UsersService {
   }
 
   async updateOneById(id: string, data: UpdateUserDto) {
-    const user = await this.findOneById(id);
+    const user = await this.userModel.findById(id);
 
     if (!user) {
       throw new BadRequestException('User not found.');
