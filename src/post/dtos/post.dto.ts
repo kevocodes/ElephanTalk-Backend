@@ -11,14 +11,12 @@ import {
 export class CreatePostDto {
   @Transform(({ value }) => value.trim())
   @IsString()
-  @IsNotEmpty()
   @MinLength(8)
   @MaxLength(60)
   title: string;
 
   @Transform(({ value }) => value.trim())
   @IsString()
-  @IsNotEmpty()
   @MinLength(8)
   description: string;
 
