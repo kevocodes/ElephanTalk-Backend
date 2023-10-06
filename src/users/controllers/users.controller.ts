@@ -29,7 +29,7 @@ export class UsersController {
   async findOne(@Param('id', MongoIdPipe) id: string) {
     return {
       data: await this.userService.findOneById(id),
-    };g
+    };
   }
 
   @Delete(':id')
