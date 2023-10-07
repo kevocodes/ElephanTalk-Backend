@@ -1,7 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -31,7 +35,7 @@ export class UsersService {
     return await newUser.save();
   }
 
-  async findOneById(id: string) {
+  async findOneById(id: Types.ObjectId) {
     const user = await this.userModel.findById(id);
 
     if (!user) {
@@ -57,11 +61,11 @@ export class UsersService {
       .select('+password');
   }
 
-  async findAll() {
+  findAll() {
     return this.userModel.find();
   }
 
-  async deleteOneById(id: string) {
+  async deleteOneById(id: Types.ObjectId) {
     const user = await this.userModel.findById(id);
 
     if (!user) {
@@ -71,7 +75,7 @@ export class UsersService {
     return await this.userModel.deleteOne({ _id: id });
   }
 
-  async updateOneById(id: string, data: UpdateUserDto) {
+  async updateOneById(id: Types.ObjectId, data: UpdateUserDto) {
     const user = await this.userModel.findById(id);
 
     if (!user) {
@@ -96,5 +100,29 @@ export class UsersService {
     );
 
     return updatedUser;
+  }
+
+  async toggleFavoritePost(userId: Types.ObjectId, postId: Types.ObjectId) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    let { favorites } = user;
+
+    const isFavorite = favorites.includes(postId);
+
+    if (isFavorite) {
+      favorites = favorites.filter((id) => !id.equals(postId));
+    } else {
+      favorites.push(postId);
+    }
+
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { $set: { favorites } },
+      { new: true },
+    );
   }
 }

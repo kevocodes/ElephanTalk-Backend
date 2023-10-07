@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export class TokenPayload {
-  sub: string;
+  sub: Types.ObjectId;
 }

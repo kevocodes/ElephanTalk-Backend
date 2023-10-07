@@ -11,6 +11,7 @@ import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { UpdateUserDto } from '../dtos/user.dto';
+import { Types } from 'mongoose';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -26,14 +27,14 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', MongoIdPipe) id: string) {
+  async findOne(@Param('id', MongoIdPipe) id: Types.ObjectId) {
     return {
       data: await this.userService.findOneById(id),
     };
   }
 
   @Delete(':id')
-  async deleteOne(@Param('id', MongoIdPipe) id: string) {
+  async deleteOne(@Param('id', MongoIdPipe) id: Types.ObjectId) {
     return {
       data: await this.userService.deleteOneById(id),
     };
@@ -41,7 +42,7 @@ export class UsersController {
 
   @Put(':id')
   async updateOne(
-    @Param('id', MongoIdPipe) id: string,
+    @Param('id', MongoIdPipe) id: Types.ObjectId,
     @Body() body: UpdateUserDto,
   ) {
     return {

@@ -1,5 +1,7 @@
+import { Types } from 'mongoose';
+
 export class Comment {
-  description: string;
-  user: string;
+  content: string;
+  user: Types.ObjectId;
   createdAt: Date;
 }

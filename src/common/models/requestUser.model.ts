@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export interface RequestUser {
-  id: string;
+  id: Types.ObjectId;
 }

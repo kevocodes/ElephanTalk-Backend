@@ -3,8 +3,8 @@ import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
-  @Transform(({ value }) => value.trim())
   @IsString()
+  @Transform(({ value }) => value.trim())
   @IsNotEmpty()
   @MinLength(4)
   readonly username: string;
@@ -13,8 +13,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   readonly email: string;
 
-  @Transform(({ value }) => value.trim())
   @IsString()
+  @Transform(({ value }) => value.trim())
   @IsNotEmpty()
   @MinLength(8)
   readonly password: string;
