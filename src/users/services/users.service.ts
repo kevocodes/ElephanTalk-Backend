@@ -32,7 +32,12 @@ export class UsersService {
     const hash = await bcrypt.hash(newUser.password, salt);
     newUser.password = hash;
 
-    return await newUser.save();
+    const user = await newUser.save();
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...withoutPassword } = user.toObject();
+
+    return withoutPassword;
   }
 
   async findOneById(id: Types.ObjectId) {

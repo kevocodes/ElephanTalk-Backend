@@ -1,6 +1,14 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
+import { Role } from 'src/common/models/roles.model';
 
 export class CreateUserDto {
   @IsString()
@@ -12,6 +20,10 @@ export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   readonly email: string;
+
+  @IsEnum(Role)
+  @IsOptional()
+  role: Role;
 
   @IsString()
   @Transform(({ value }) => value.trim())

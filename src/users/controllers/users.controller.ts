@@ -8,16 +8,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { UpdateUserDto } from '../dtos/user.dto';
 import { Types } from 'mongoose';
+import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from 'src/common/models/roles.model';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
+  @Roles(Role.ADMIN)
   @Get()
   async findAll() {
     const users = await this.userService.findAll();

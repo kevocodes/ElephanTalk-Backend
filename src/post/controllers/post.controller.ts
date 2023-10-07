@@ -13,7 +13,7 @@ import {
 import { CommentPostDto, CreatePostDto, UpdatePostDto } from '../dtos/post.dto';
 import { Request } from 'express';
 import { PostService } from '../services/post.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { RequestUser } from 'src/common/models/requestUser.model';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { Types } from 'mongoose';
