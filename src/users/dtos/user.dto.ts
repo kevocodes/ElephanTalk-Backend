@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -23,7 +23,7 @@ export class CreateUserDto {
 
   @IsEnum(Role)
   @IsOptional()
-  role: Role;
+  readonly role: Role;
 
   @IsString()
   @Transform(({ value }) => value.trim())
@@ -32,4 +32,12 @@ export class CreateUserDto {
   readonly password: string;
 }
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UpdateUserDto extends PartialType(
+  OmitType(CreateUserDto, ['role'] as const),
+) {}
+
+export class UpdateUserRoleDto {
+  @IsEnum(Role)
+  @IsNotEmpty()
+  readonly role: Role;
+}

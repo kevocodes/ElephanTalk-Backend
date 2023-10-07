@@ -8,6 +8,8 @@ import { User } from '../schemas/user.schema';
 import { Model, Types } from 'mongoose';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/common/models/roles.model';
+import { RequestUser } from 'src/common/models/requestUser.model';
 
 @Injectable()
 export class UsersService {
@@ -71,20 +73,20 @@ export class UsersService {
   }
 
   async deleteOneById(id: Types.ObjectId) {
-    const user = await this.userModel.findById(id);
-
-    if (!user) {
-      throw new BadRequestException('User not found.');
-    }
+    await this.findOneById(id);
 
     return await this.userModel.deleteOne({ _id: id });
   }
 
-  async updateOneById(id: Types.ObjectId, data: UpdateUserDto) {
-    const user = await this.userModel.findById(id);
+  async updateOneById(
+    id: Types.ObjectId,
+    data: UpdateUserDto,
+    currentUser: RequestUser,
+  ) {
+    const user = await this.findOneById(id);
 
-    if (!user) {
-      throw new BadRequestException('User not found.');
+    if (user._id != currentUser.id && currentUser.role != Role.ADMIN) {
+      throw new BadRequestException('You can only update your own user.');
     }
 
     const emailUser = await this.findOneByEmail(data.email);
@@ -105,6 +107,16 @@ export class UsersService {
     );
 
     return updatedUser;
+  }
+
+  async updateRole(id: Types.ObjectId, role: Role) {
+    await this.findOneById(id);
+
+    return this.userModel.findOneAndUpdate(
+      { _id: id },
+      { $set: { role } },
+      { new: true },
+    );
   }
 
   async toggleFavoritePost(userId: Types.ObjectId, postId: Types.ObjectId) {
