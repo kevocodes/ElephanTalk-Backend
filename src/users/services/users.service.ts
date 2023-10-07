@@ -136,10 +136,8 @@ export class UsersService {
       favorites.push(postId);
     }
 
-    return this.userModel.findByIdAndUpdate(
-      userId,
-      { $set: { favorites } },
-      { new: true },
-    );
+    return this.userModel
+      .findByIdAndUpdate(userId, { $set: { favorites } }, { new: true })
+      .select('favorites -_id');
   }
 }

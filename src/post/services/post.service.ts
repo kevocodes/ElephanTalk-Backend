@@ -6,9 +6,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from '../schemas/post.schema';
 import { CommentPostDto, CreatePostDto, UpdatePostDto } from '../dtos/post.dto';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Comment } from '../models/comment.model';
 import { UsersService } from 'src/users/services/users.service';
+import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
 
 @Injectable()
 export class PostService {
@@ -17,31 +18,82 @@ export class PostService {
     private readonly usersService: UsersService,
   ) {}
 
-  create(id: Types.ObjectId, data: CreatePostDto) {
+  async create(id: Types.ObjectId, data: CreatePostDto) {
     const newPost = new this.postModel({ ...data, user: id });
-    return newPost.save();
+    return await newPost.save();
   }
 
-  findAll() {
-    return this.postModel.find();
+  async findAll(
+    paginationParams: PaginationParamsDto,
+    query: FilterQuery<Post> = {},
+  ) {
+    const { limit = 20, page = 1 } = paginationParams;
+
+    const skip = limit * (page - 1);
+    const count = await this.postModel.count(query);
+    const pages = Math.ceil(count / limit);
+
+    const posts = await this.postModel
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }) // sort by createdAt in descending order
+      .populate('user', 'username -_id') // select username field and exclude _id field
+      .populate('likes', 'username -_id') // select username field and exclude _id field
+      .populate({ path: 'comments.user', select: 'username -_id' }) // select username field and exclude _id field
+      .select('-comments._id'); // exclude _id field from comments
+
+    return {
+      data: posts,
+      pagination: {
+        count,
+        page,
+        pages,
+        limit,
+      },
+    };
   }
 
-  findAllAvailable() {
-    return this.postModel.find({ active: true });
-  }
-
-  findAllOwned(userId: Types.ObjectId) {
-    return this.postModel.find({ user: userId });
-  }
-
-  async findAllFavorites(userId: Types.ObjectId) {
+  async findAllFavorites(
+    userId: Types.ObjectId,
+    paginationParams: PaginationParamsDto,
+  ) {
     const user = await this.usersService.findOneById(userId);
 
-    return this.postModel.find({ _id: { $in: user.favorites } });
+    const { limit = 20, page = 1 } = paginationParams;
+
+    const skip = limit * (page - 1);
+    const count = await this.postModel.count({ _id: { $in: user.favorites } });
+    const pages = Math.ceil(count / limit);
+
+    const posts = await this.postModel
+      .find({ _id: { $in: user.favorites } })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }) // sort by createdAt in descending order
+      .populate('user', 'username -_id') // select username field and exclude _id field
+      .populate('likes', 'username -_id') // select username field and exclude _id field
+      .populate({ path: 'comments.user', select: 'username -_id' }) // select username field and exclude _id field
+      .select('-comments._id'); // exclude _id field from comments
+
+    return {
+      data: posts,
+      pagination: {
+        count,
+        page,
+        pages,
+        limit,
+      },
+    };
   }
 
   async findOneById(id: Types.ObjectId) {
-    const post = await this.postModel.findOne({ _id: id }).populate('user');
+    const post = await this.postModel
+      .findOne({ _id: id })
+      .populate('user', 'username') // select just username field
+      .populate('likes', 'username') // select just username field
+      .populate({ path: 'comments.user', select: 'username -_id' }) // select username field and exclude _id field
+      .select('-comments._id'); // exclude _id field from comments;
 
     if (!post) {
       throw new NotFoundException('Post not found.');
@@ -61,11 +113,9 @@ export class PostService {
       throw new UnauthorizedException('Unauthorized to update this post.');
     }
 
-    const updatedPost = this.postModel.findByIdAndUpdate(
-      id,
-      { $set: changes },
-      { new: true },
-    );
+    const updatedPost = this.postModel
+      .findByIdAndUpdate(id, { $set: changes }, { new: true })
+      .select('title description image updatedAt -_id');
 
     return updatedPost;
   }
@@ -87,17 +137,21 @@ export class PostService {
       throw new UnauthorizedException('Unauthorized to update this post.');
     }
 
-    return this.postModel.findByIdAndUpdate(
-      id,
-      { $set: { active: !post.active } },
-      { new: true },
-    );
+    return this.postModel
+      .findByIdAndUpdate(id, { $set: { active: !post.active } }, { new: true })
+      .select('active -_id');
   }
 
   async toggleLike(id: Types.ObjectId, userId: Types.ObjectId) {
-    const post = await this.findOneById(id);
+    const post = await this.postModel.findById(id);
+
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
 
     let { likes } = post;
+
+    console.log(likes);
 
     const isLiked = likes.includes(userId);
 
@@ -109,7 +163,7 @@ export class PostService {
 
     return this.postModel
       .findByIdAndUpdate(id, { $set: { likes } }, { new: true })
-      .populate('user');
+      .select('likes -_id');
   }
 
   async addComment(
@@ -125,11 +179,9 @@ export class PostService {
       createdAt: new Date(),
     };
 
-    return this.postModel.findByIdAndUpdate(
-      id,
-      { $push: { comments: newComment } },
-      { new: true },
-    );
+    return this.postModel
+      .findByIdAndUpdate(id, { $push: { comments: newComment } }, { new: true })
+      .select('comments -_id');
   }
 
   async toggleFavorite(userId: Types.ObjectId, postId: Types.ObjectId) {

@@ -24,7 +24,20 @@ export class Post {
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   likes: Types.ObjectId[];
 
-  @Prop({ default: [] })
+  @Prop({
+    type: [
+      {
+        content: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        user: { type: Types.ObjectId, ref: 'User', required: true },
+        createdAt: Date,
+      },
+    ],
+    default: [],
+  })
   comments: Comment[];
 }
 

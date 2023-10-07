@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { RequestUser } from 'src/common/models/requestUser.model';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { Types } from 'mongoose';
+import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('post')
@@ -33,35 +35,30 @@ export class PostController {
   }
 
   @Get()
-  async findAllAvailable() {
-    return {
-      data: await this.postService.findAllAvailable(),
-    };
+  async findAllAvailable(@Query() query: PaginationParamsDto) {
+    return await this.postService.findAll(query, { active: true });
   }
 
   @Get('all')
-  async findAll() {
-    return {
-      data: await this.postService.findAll(),
-    };
+  async findAll(@Query() query: PaginationParamsDto) {
+    return await this.postService.findAll(query);
   }
 
   @Get('owned')
-  async findAllOwned(@Req() req: Request) {
+  async findAllOwned(@Req() req: Request, @Query() query: PaginationParamsDto) {
     const { id } = req.user as RequestUser;
 
-    return {
-      data: await this.postService.findAllOwned(id),
-    };
+    return await this.postService.findAll(query, { user: id });
   }
 
   @Get('favorites')
-  async findAllFavorites(@Req() req: Request) {
+  async findAllFavorites(
+    @Req() req: Request,
+    @Query() query: PaginationParamsDto,
+  ) {
     const { id } = req.user as RequestUser;
 
-    return {
-      data: await this.postService.findAllFavorites(id),
-    };
+    return await this.postService.findAllFavorites(id, query);
   }
 
   @Get(':id')
