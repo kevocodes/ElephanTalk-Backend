@@ -1,12 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Transform } from 'class-transformer';
-import {
-  IsNotEmpty,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 
 export class CreatePostDto {
   @Transform(({ value }) => value.trim())
@@ -21,7 +15,6 @@ export class CreatePostDto {
   description: string;
 
   @IsUrl()
-  @IsNotEmpty()
   image: string;
 }
 

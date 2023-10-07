@@ -14,4 +14,8 @@ export class PostService {
     const newPost = new this.postModel({ ...data, user: id });
     return newPost.save();
   }
+
+  findAllAvailable() {
+    return this.postModel.find({ active: true });
+  }
 }

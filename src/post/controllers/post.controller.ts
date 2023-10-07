@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { CreatePostDto } from '../dtos/post.dto';
 import { Request } from 'express';
 import { PostService } from '../services/post.service';
@@ -16,6 +16,13 @@ export class PostController {
 
     return {
       data: await this.postService.create(id, body),
+    };
+  }
+
+  @Get()
+  async findAllAvailable() {
+    return {
+      data: await this.postService.findAllAvailable(),
     };
   }
 }

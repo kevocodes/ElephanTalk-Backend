@@ -1,3 +1,7 @@
+import * as debug from 'debug'; // Importar 'debug' como un módulo en lugar de como una función
+
+const log = debug('posts-API:main');
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -12,6 +16,9 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT || 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port, () =>
+    log(`Server running on http://localhost:${port}`),
+  );
 }
 bootstrap();
