@@ -1,7 +1,7 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from '../schemas/post.schema';
@@ -110,7 +110,7 @@ export class PostService {
     const post = await this.findOneById(id);
 
     if (!post.user._id.equals(userId)) {
-      throw new UnauthorizedException('Unauthorized to update this post.');
+      throw new ForbiddenException('Forbidden to update this post.');
     }
 
     const updatedPost = this.postModel
@@ -124,7 +124,7 @@ export class PostService {
     const post = await this.findOneById(id);
 
     if (!post.user._id.equals(userId)) {
-      throw new UnauthorizedException('Unauthorized to delete this post.');
+      throw new ForbiddenException('Forbidden to delete this post.');
     }
 
     return this.postModel.deleteOne({ _id: id });
@@ -134,7 +134,7 @@ export class PostService {
     const post = await this.findOneById(id);
 
     if (!post.user._id.equals(userId)) {
-      throw new UnauthorizedException('Unauthorized to update this post.');
+      throw new ForbiddenException('Forbidden to update this post.');
     }
 
     return this.postModel

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -46,7 +47,7 @@ export class UsersService {
     const user = await this.userModel.findById(id);
 
     if (!user) {
-      throw new BadRequestException('User not found.');
+      throw new NotFoundException('User not found.');
     }
 
     return user;
@@ -86,7 +87,7 @@ export class UsersService {
     const user = await this.findOneById(id);
 
     if (user._id != currentUser.id && currentUser.role != Role.ADMIN) {
-      throw new BadRequestException('You can only update your own user.');
+      throw new ForbiddenException('You can only update your own user.');
     }
 
     const emailUser = await this.findOneByEmail(data.email);

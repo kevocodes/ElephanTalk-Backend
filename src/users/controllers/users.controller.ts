@@ -19,12 +19,30 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/models/roles.model';
 import { Request } from 'express';
 import { RequestUser } from 'src/common/models/requestUser.model';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
+@ApiTags('users')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
+  /**
+   * Get all users
+   */
+  @ApiOkResponse({ description: 'Users found' })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Get()
   @Roles(Role.ADMIN)
   async findAll() {
@@ -34,14 +52,30 @@ export class UsersController {
     };
   }
 
-  @Get(':id')
+  /**
+   * Get one user by id
+   */
+  @ApiOkResponse({ description: 'User found' })
+  @ApiNotFoundResponse({ description: 'Searched user not found' })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Roles(Role.ADMIN)
+  @Get(':id')
   async findOne(@Param('id', MongoIdPipe) id: Types.ObjectId) {
     return {
       data: await this.userService.findOneById(id),
     };
   }
 
+  /**
+   * Delete one user by id
+   */
+  @ApiOkResponse({ description: 'User deleted' })
+  @ApiNotFoundResponse({ description: 'Searched user found' })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Roles(Role.ADMIN)
   @Delete(':id')
   async deleteOne(@Param('id', MongoIdPipe) id: Types.ObjectId) {
@@ -50,6 +84,15 @@ export class UsersController {
     };
   }
 
+  /**
+   * Update one user by id
+   */
+  @ApiOkResponse({ description: 'User updated' })
+  @ApiNotFoundResponse({ description: 'Searched user found' })
+  @ApiBadRequestResponse({ description: 'Email or username already exists' })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Put(':id')
   async updateOne(
     @Param('id', MongoIdPipe) id: Types.ObjectId,
@@ -63,6 +106,14 @@ export class UsersController {
     };
   }
 
+  /**
+   * Update user role by id
+   */
+  @ApiOkResponse({ description: 'Role updated' })
+  @ApiNotFoundResponse({ description: 'Searched user found' })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Patch(':id/role')
   @Roles(Role.ADMIN)
   async updateRole(

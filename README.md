@@ -24,7 +24,29 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This is the repository of the API for the social media platform for posts, developed using NestJS as the framework and MongoDB as the database.
+
+## Documentation
+
+To access the documentation, go to the `/docs` route of the API.
+
+```url
+http://localhost:3000/docs
+```
+
+## Configuration
+Copy the `.env.example` file and rename it to `.env`.
+Make sure you have the following environment variables:
+```env
+# Mongo uri to connect to db
+MONGO_URI=""
+
+# API port (Optional, by default is 3000)
+PORT=0
+
+# Secret to sign JWT 
+JWT_SECRET=""
+```
 
 ## Installation
 
@@ -61,12 +83,6 @@ $ npm run test:cov
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 

@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 

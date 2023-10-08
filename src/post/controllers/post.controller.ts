@@ -19,12 +19,28 @@ import { RequestUser } from 'src/common/models/requestUser.model';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { Types } from 'mongoose';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
+@ApiTags('post')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  /**
+   * Create a new post
+   */
+  @ApiOkResponse({ description: 'Post created' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Post()
   async create(@Body() body: CreatePostDto, @Req() req: Request) {
     const { id } = req.user as RequestUser;
@@ -34,16 +50,31 @@ export class PostController {
     };
   }
 
+  /**
+   * Find all available posts
+   */
+  @ApiOkResponse({ description: 'Available posts found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Get()
   async findAllAvailable(@Query() query: PaginationParamsDto) {
     return await this.postService.findAll(query, { active: true });
   }
 
+  /**
+   * Find all posts
+   */
+  @ApiOkResponse({ description: 'Posts found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Get('all')
   async findAll(@Query() query: PaginationParamsDto) {
     return await this.postService.findAll(query);
   }
 
+  /**
+   * Find all posts owned by the user
+   */
+  @ApiOkResponse({ description: 'Owned posts found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Get('owned')
   async findAllOwned(@Req() req: Request, @Query() query: PaginationParamsDto) {
     const { id } = req.user as RequestUser;
@@ -51,6 +82,13 @@ export class PostController {
     return await this.postService.findAll(query, { user: id });
   }
 
+  /**
+   * Find all posts liked by the user
+   */
+
+  @ApiOkResponse({ description: 'Available posts found' })
+  @ApiNotFoundResponse({ description: 'Searched user not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Get('favorites')
   async findAllFavorites(
     @Req() req: Request,
@@ -61,6 +99,13 @@ export class PostController {
     return await this.postService.findAllFavorites(id, query);
   }
 
+  /**
+   * Find a post by id
+   */
+  @ApiOkResponse({ description: 'Post found' })
+  @ApiNotFoundResponse({ description: 'Searched post not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Get(':id')
   async findOne(@Param('id', MongoIdPipe) id: Types.ObjectId) {
     return {
@@ -68,6 +113,14 @@ export class PostController {
     };
   }
 
+  /**
+   * Update a post
+   */
+  @ApiOkResponse({ description: 'Post updated' })
+  @ApiNotFoundResponse({ description: 'Searched post found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiParam({ name: 'id', type: String })
   @Put(':id')
   async updateOne(
     @Req() req: Request,
@@ -81,6 +134,14 @@ export class PostController {
     };
   }
 
+  /**
+   * Delete a post
+   */
+  @ApiOkResponse({ description: 'Post deleted' })
+  @ApiNotFoundResponse({ description: 'Searched post found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiParam({ name: 'id', type: String })
   @Delete(':id')
   async deleteOne(
     @Req() req: Request,
@@ -93,6 +154,14 @@ export class PostController {
     };
   }
 
+  /**
+   * Set active or inactive a post
+   */
+  @ApiOkResponse({ description: 'Post active property updated' })
+  @ApiNotFoundResponse({ description: 'Searched post not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiParam({ name: 'id', type: String })
   @Patch(':id/active')
   async toggleActive(
     @Req() req: Request,
@@ -105,6 +174,13 @@ export class PostController {
     };
   }
 
+  /**
+   * Like or dislike a post
+   */
+  @ApiOkResponse({ description: 'Post liked or disliked' })
+  @ApiNotFoundResponse({ description: 'Searched post not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Patch(':id/like')
   async toggleLike(
     @Req() req: Request,
@@ -117,6 +193,13 @@ export class PostController {
     };
   }
 
+  /**
+   * Add a comment to a post
+   */
+  @ApiOkResponse({ description: 'Post commented' })
+  @ApiNotFoundResponse({ description: 'Searched post not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Patch(':id/comment')
   async addComment(
     @Req() req: Request,
@@ -130,6 +213,15 @@ export class PostController {
     };
   }
 
+  /**
+   * Add or remove a post from favorites
+   */
+  @ApiOkResponse({ description: 'Post commented' })
+  @ApiNotFoundResponse({
+    description: 'Searched post or current user not found',
+  })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
   @Patch(':id/favorite')
   async toggleFavorite(
     @Req() req: Request,
