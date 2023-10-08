@@ -151,8 +151,6 @@ export class PostService {
 
     let { likes } = post;
 
-    console.log(likes);
-
     const isLiked = likes.includes(userId);
 
     if (isLiked) {
