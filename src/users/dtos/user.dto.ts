@@ -1,10 +1,9 @@
-import { OmitType, PartialType } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -21,10 +20,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   readonly email: string;
 
-  @IsEnum(Role)
-  @IsOptional()
-  readonly role: Role;
-
   @IsString()
   @Transform(({ value }) => value.trim())
   @IsNotEmpty()
@@ -32,9 +27,7 @@ export class CreateUserDto {
   readonly password: string;
 }
 
-export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['role'] as const),
-) {}
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
 
 export class UpdateUserRoleDto {
   @IsEnum(Role)
