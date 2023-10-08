@@ -1,14 +1,14 @@
 export const loginExamples = {
   'With email': {
     value: {
-      email: 'string',
-      password: 'string',
+      username: 'user@email.com',
+      password: 'my-password',
     },
   },
   'With username': {
     value: {
-      username: 'string',
-      password: 'string',
+      username: 'user',
+      password: 'my-password',
     },
   },
 };
