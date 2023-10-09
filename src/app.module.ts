@@ -19,8 +19,8 @@ import appConfig from 'src/config/app.config';
       }),
     }),
     DatabaseModule,
-    UsersModule,
     AuthModule,
+    UsersModule,
     PostModule,
   ],
 })
