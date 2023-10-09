@@ -20,7 +20,9 @@ import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { Types } from 'mongoose';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -39,7 +41,8 @@ export class PostController {
   /**
    * Create a new post
    */
-  @ApiOkResponse({ description: 'Post created' })
+  @ApiCreatedResponse({ description: 'Post created' })
+  @ApiBadRequestResponse({ description: 'Invalid create data' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Post()
   async create(@Body() body: CreatePostDto, @Req() req: Request) {
@@ -118,6 +121,7 @@ export class PostController {
    */
   @ApiOkResponse({ description: 'Post updated' })
   @ApiNotFoundResponse({ description: 'Searched post found' })
+  @ApiBadRequestResponse({ description: 'Invalid update data' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
   @ApiParam({ name: 'id', type: String })

@@ -36,7 +36,9 @@ export class AuthController {
    * Register a new user
    */
   @ApiCreatedResponse({ description: 'User registered' })
-  @ApiBadRequestResponse({ description: 'Email or username already exists' })
+  @ApiBadRequestResponse({
+    description: 'Email or username already exists - Invalid create data',
+  })
   @Post('register')
   async register(@Body() payload: CreateUserDto) {
     return {

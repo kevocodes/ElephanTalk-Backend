@@ -5,7 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
-import appConfig from 'config/app.config';
+import appConfig from 'src/config/app.config';
 
 @Module({
   imports: [
