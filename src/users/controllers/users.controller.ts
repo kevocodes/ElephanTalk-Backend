@@ -72,7 +72,7 @@ export class UsersController {
    * Delete one user by id
    */
   @ApiOkResponse({ description: 'User deleted' })
-  @ApiNotFoundResponse({ description: 'Searched user found' })
+  @ApiNotFoundResponse({ description: 'Searched user not found' })
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiParam({ name: 'id', type: String })
@@ -88,7 +88,7 @@ export class UsersController {
    * Update one user by id
    */
   @ApiOkResponse({ description: 'User updated' })
-  @ApiNotFoundResponse({ description: 'Searched user found' })
+  @ApiNotFoundResponse({ description: 'Searched user not found' })
   @ApiBadRequestResponse({ description: 'Email or username already exists' })
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
@@ -110,7 +110,7 @@ export class UsersController {
    * Update user role by id
    */
   @ApiOkResponse({ description: 'Role updated' })
-  @ApiNotFoundResponse({ description: 'Searched user found' })
+  @ApiNotFoundResponse({ description: 'Searched user not found' })
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiParam({ name: 'id', type: String })

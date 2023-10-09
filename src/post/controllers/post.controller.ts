@@ -120,7 +120,7 @@ export class PostController {
    * Update a post
    */
   @ApiOkResponse({ description: 'Post updated' })
-  @ApiNotFoundResponse({ description: 'Searched post found' })
+  @ApiNotFoundResponse({ description: 'Searched post not found' })
   @ApiBadRequestResponse({ description: 'Invalid update data' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
@@ -142,7 +142,7 @@ export class PostController {
    * Delete a post
    */
   @ApiOkResponse({ description: 'Post deleted' })
-  @ApiNotFoundResponse({ description: 'Searched post found' })
+  @ApiNotFoundResponse({ description: 'Searched post not found' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
   @ApiParam({ name: 'id', type: String })
