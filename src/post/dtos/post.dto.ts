@@ -5,13 +5,13 @@ import { IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 export class CreatePostDto {
   @IsString()
   @Transform(({ value }) => value.trim())
-  @MinLength(8)
+  @MinLength(1)
   @MaxLength(60)
   title: string;
 
   @IsString()
   @Transform(({ value }) => value.trim())
-  @MinLength(8)
+  @MinLength(1)
   description: string;
 
   @IsUrl()
@@ -23,6 +23,6 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {}
 export class CommentPostDto {
   @IsString()
   @Transform(({ value }) => value.trim())
-  @MinLength(8)
+  @MinLength(1)
   content: string;
 }
