@@ -30,15 +30,12 @@ jobs:
         cache: 'npm'
     
     - name: Install dependencies
-      run: npm ci
+      run: npm install
     
     - name: Create prod env file
       run: echo "$ENV_FILE" > .env
       env:
         ENV_FILE: ${{ secrets.ENV_FILE }}
-    
-    - name: Display .env file content
-      run: cat .env
       
     - name: Create production build 
       run: npm run build --if-present
