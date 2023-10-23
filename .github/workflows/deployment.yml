@@ -33,9 +33,12 @@ jobs:
       run: npm ci
     
     - name: Create prod env file
-      run: echo "${{ secrets.ENV_FILE }}" > .env
+      run: echo "$ENV_FILE" > .env
+      env:
+        ENV_FILE: ${{ secrets.ENV_FILE }}
     
-    - run: echo "${{ secrets.ENV_FILE }}"
+    - name: Display .env file content
+      run: cat .env
       
     - name: Create production build 
       run: npm run build --if-present
