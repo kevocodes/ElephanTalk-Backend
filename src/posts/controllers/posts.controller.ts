@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CommentPostDto, CreatePostDto, UpdatePostDto } from '../dtos/post.dto';
 import { Request } from 'express';
-import { PostService } from '../services/post.service';
+import { PostService } from '../services/posts.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { RequestUser } from 'src/common/models/requestUser.model';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
@@ -31,10 +31,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-@ApiTags('post')
+@ApiTags('posts')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('post')
+@Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
