@@ -6,13 +6,10 @@ name: Node.js CD
 on:
   push:
     branches: [ "main" ]
-  pull_request_review:
-    branches: [ "main" ]
-    types: ["submitted"]
 
 jobs:
   build:
-
+    name: Build and deploy
     runs-on: [self-hosted, api]
 
     strategy:
@@ -30,7 +27,7 @@ jobs:
         cache: 'npm'
     
     - name: Install project dependencies
-      run: npm install
+      run: yarn
     
     - name: Create prod env file
       run: echo "$ENV_FILE" > .env
@@ -38,7 +35,7 @@ jobs:
         ENV_FILE: ${{ secrets.ENV_FILE }}
       
     - name: Create production build 
-      run: npm run build --if-present
+      run: yarn run build
         
     - name: Start in server
       run: pm2 reload posts-api
