@@ -16,6 +16,16 @@ export class CreateUserDto {
   @MinLength(4)
   readonly username: string;
 
+  @IsString()
+  @Transform(({ value }) => value.trim())
+  @IsNotEmpty()
+  readonly name: string;
+
+  @IsString()
+  @Transform(({ value }) => value.trim())
+  @IsNotEmpty()
+  readonly lastname: string;
+
   @IsEmail()
   @IsNotEmpty()
   readonly email: string;

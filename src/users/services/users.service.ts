@@ -34,6 +34,7 @@ export class UsersService {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(newUser.password, salt);
     newUser.password = hash;
+    newUser.picture = `https://i.pravatar.cc/150?u=${newUser.username}`;
 
     const user = await newUser.save();
 
