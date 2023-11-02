@@ -30,10 +30,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { Role } from 'src/common/models/roles.model';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('posts')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
@@ -68,6 +71,8 @@ export class PostController {
    */
   @ApiOkResponse({ description: 'Posts found' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @Roles(Role.ADMIN)
   @Get('all')
   async findAll(@Query() query: PaginationParamsDto) {
     return await this.postService.findAll(query);
@@ -110,9 +115,14 @@ export class PostController {
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiParam({ name: 'id', type: String })
   @Get(':id')
-  async findOne(@Param('id', MongoIdPipe) id: Types.ObjectId) {
+  async findOne(
+    @Req() req: Request,
+    @Param('id', MongoIdPipe) id: Types.ObjectId,
+  ) {
+    const user = req.user as RequestUser;
+
     return {
-      data: await this.postService.findOneById(id),
+      data: await this.postService.findOneById(id, user.id),
     };
   }
 

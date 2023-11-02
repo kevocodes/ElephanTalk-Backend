@@ -38,9 +38,9 @@ export class PostService {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
-      .populate('user', 'username -_id') // select username field and exclude _id field
-      .populate('likes', 'username -_id') // select username field and exclude _id field
-      .populate({ path: 'comments.user', select: 'username -_id' }) // select username field and exclude _id field
+      .populate('user', 'username picture') // select username, and picture field
+      .populate('likes', 'username picture') // select username, and picture field
+      .populate({ path: 'comments.user', select: 'username picture' }) // select username, and picture field
       .select('-comments._id'); // exclude _id field from comments
 
     return {
@@ -67,13 +67,13 @@ export class PostService {
     const pages = Math.ceil(count / limit);
 
     const posts = await this.postModel
-      .find({ _id: { $in: user.favorites } })
+      .find({ _id: { $in: user.favorites }, active: true })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
-      .populate('user', 'username -_id') // select username field and exclude _id field
-      .populate('likes', 'username -_id') // select username field and exclude _id field
-      .populate({ path: 'comments.user', select: 'username -_id' }) // select username field and exclude _id field
+      .populate('user', 'username picture') // select username, and picture field
+      .populate('likes', 'username picture') // select username, and picture field
+      .populate({ path: 'comments.user', select: 'username picture' }) // select username, and picture field
       .select('-comments._id'); // exclude _id field from comments
 
     return {
@@ -87,15 +87,19 @@ export class PostService {
     };
   }
 
-  async findOneById(id: Types.ObjectId) {
+  async findOneById(id: Types.ObjectId, userId: Types.ObjectId) {
     const post = await this.postModel
       .findOne({ _id: id })
-      .populate('user', 'username') // select just username field
-      .populate('likes', 'username') // select just username field
-      .populate({ path: 'comments.user', select: 'username -_id' }) // select username field and exclude _id field
+      .populate('user', 'username picture') // select username, and picture field
+      .populate('likes', 'username picture') // select username, and picture field
+      .populate({ path: 'comments.user', select: 'username picture' }) // select username, and picture field
       .select('-comments._id'); // exclude _id field from comments;
 
     if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+
+    if (!post.active && !post.user._id.equals(userId)) {
       throw new NotFoundException('Post not found.');
     }
 
@@ -107,7 +111,7 @@ export class PostService {
     changes: UpdatePostDto,
     userId: Types.ObjectId,
   ) {
-    const post = await this.findOneById(id);
+    const post = await this.findOneById(id, userId);
 
     if (!post.user._id.equals(userId)) {
       throw new ForbiddenException('Forbidden to update this post.');
@@ -121,7 +125,7 @@ export class PostService {
   }
 
   async deleteOneById(id: Types.ObjectId, userId: Types.ObjectId) {
-    const post = await this.findOneById(id);
+    const post = await this.findOneById(id, userId);
 
     if (!post.user._id.equals(userId)) {
       throw new ForbiddenException('Forbidden to delete this post.');
@@ -131,7 +135,7 @@ export class PostService {
   }
 
   async toggleActive(id: Types.ObjectId, userId: Types.ObjectId) {
-    const post = await this.findOneById(id);
+    const post = await this.findOneById(id, userId);
 
     if (!post.user._id.equals(userId)) {
       throw new ForbiddenException('Forbidden to update this post.');
@@ -169,7 +173,7 @@ export class PostService {
     userId: Types.ObjectId,
     comment: CommentPostDto,
   ) {
-    await this.findOneById(id);
+    await this.findOneById(id, userId);
 
     const newComment: Comment = {
       content: comment.content,
@@ -183,7 +187,7 @@ export class PostService {
   }
 
   async toggleFavorite(userId: Types.ObjectId, postId: Types.ObjectId) {
-    await this.findOneById(postId);
+    await this.findOneById(postId, userId);
 
     return this.usersService.toggleFavoritePost(userId, postId);
   }
