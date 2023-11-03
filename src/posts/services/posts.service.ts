@@ -26,7 +26,10 @@ export class PostService {
   async findAll(
     paginationParams: PaginationParamsDto,
     query: FilterQuery<Post> = {},
+    userId: Types.ObjectId,
   ) {
+    const { favorites } = await this.usersService.findOneById(userId);
+
     const { limit = 20, page = 1 } = paginationParams;
 
     const skip = limit * (page - 1);
@@ -46,8 +49,14 @@ export class PostService {
       }) // username, name, lastname and picture field
       .select('-comments._id'); // exclude _id field from comments
 
+    const postsWithFavoriteAndLikeFlag = posts.map((post) => {
+      const isFavorite = favorites.includes(post._id);
+      const isLiked = post.likes.some((like) => like._id.equals(userId));
+      return { ...post.toObject(), isFavorite, isLiked };
+    });
+
     return {
-      data: posts,
+      data: postsWithFavoriteAndLikeFlag,
       pagination: {
         count,
         page,
@@ -94,6 +103,8 @@ export class PostService {
   }
 
   async findOneById(id: Types.ObjectId, userId: Types.ObjectId) {
+    const { favorites } = await this.usersService.findOneById(userId);
+
     const post = await this.postModel
       .findOne({ _id: id })
       .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
@@ -112,7 +123,10 @@ export class PostService {
       throw new NotFoundException('Post not found.');
     }
 
-    return post;
+    const isFavorite = favorites.includes(post._id);
+    const isLiked = post.likes.some((like) => like._id.equals(userId));
+
+    return { ...post.toObject(), isFavorite, isLiked };
   }
 
   async updateOneById(

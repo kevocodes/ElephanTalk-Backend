@@ -62,8 +62,13 @@ export class PostController {
   @ApiOkResponse({ description: 'Available posts found' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Get()
-  async findAllAvailable(@Query() query: PaginationParamsDto) {
-    return await this.postService.findAll(query, { active: true });
+  async findAllAvailable(
+    @Req() req: Request,
+    @Query() query: PaginationParamsDto,
+  ) {
+    const { id } = req.user as RequestUser;
+
+    return await this.postService.findAll(query, { active: true }, id);
   }
 
   /**
@@ -74,8 +79,10 @@ export class PostController {
   @ApiForbiddenResponse({ description: "User doesn't have permissions" })
   @Roles(Role.ADMIN)
   @Get('all')
-  async findAll(@Query() query: PaginationParamsDto) {
-    return await this.postService.findAll(query);
+  async findAll(@Req() req: Request, @Query() query: PaginationParamsDto) {
+    const { id } = req.user as RequestUser;
+
+    return await this.postService.findAll(query, {}, id);
   }
 
   /**
@@ -87,7 +94,7 @@ export class PostController {
   async findAllOwned(@Req() req: Request, @Query() query: PaginationParamsDto) {
     const { id } = req.user as RequestUser;
 
-    return await this.postService.findAll(query, { user: id });
+    return await this.postService.findAll(query, { user: id }, id);
   }
 
   /**
