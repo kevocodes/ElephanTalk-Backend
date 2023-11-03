@@ -38,9 +38,12 @@ export class PostService {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
-      .populate('user', 'username picture') // select username, and picture field
-      .populate('likes', 'username picture') // select username, and picture field
-      .populate({ path: 'comments.user', select: 'username picture' }) // select username, and picture field
+      .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate({
+        path: 'comments.user',
+        select: 'username name lastname picture',
+      }) // username, name, lastname and picture field
       .select('-comments._id'); // exclude _id field from comments
 
     return {
@@ -71,9 +74,12 @@ export class PostService {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
-      .populate('user', 'username picture') // select username, and picture field
-      .populate('likes', 'username picture') // select username, and picture field
-      .populate({ path: 'comments.user', select: 'username picture' }) // select username, and picture field
+      .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate({
+        path: 'comments.user',
+        select: 'username name lastname picture',
+      }) // select username, name, lastname and picture field
       .select('-comments._id'); // exclude _id field from comments
 
     return {
@@ -90,9 +96,12 @@ export class PostService {
   async findOneById(id: Types.ObjectId, userId: Types.ObjectId) {
     const post = await this.postModel
       .findOne({ _id: id })
-      .populate('user', 'username picture') // select username, and picture field
-      .populate('likes', 'username picture') // select username, and picture field
-      .populate({ path: 'comments.user', select: 'username picture' }) // select username, and picture field
+      .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate({
+        path: 'comments.user',
+        select: 'username name lastname picture',
+      }) // select username, name, lastname and picture field
       .select('-comments._id'); // exclude _id field from comments;
 
     if (!post) {
