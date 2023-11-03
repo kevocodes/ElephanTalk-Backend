@@ -221,7 +221,7 @@ export class PostController {
   @ApiNotFoundResponse({ description: 'Searched post not found' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @ApiParam({ name: 'id', type: String })
-  @Patch(':id/comment')
+  @Post(':id/comment')
   async addComment(
     @Req() req: Request,
     @Param('id', MongoIdPipe) id: Types.ObjectId,
