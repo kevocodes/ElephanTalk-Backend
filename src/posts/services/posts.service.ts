@@ -70,16 +70,16 @@ export class PostService {
     userId: Types.ObjectId,
     paginationParams: PaginationParamsDto,
   ) {
-    const user = await this.usersService.findOneById(userId);
+    const { favorites } = await this.usersService.findOneById(userId);
 
     const { limit = 20, page = 1 } = paginationParams;
 
     const skip = limit * (page - 1);
-    const count = await this.postModel.count({ _id: { $in: user.favorites } });
+    const count = await this.postModel.count({ _id: { $in: favorites } });
     const pages = Math.ceil(count / limit);
 
     const posts = await this.postModel
-      .find({ _id: { $in: user.favorites }, active: true })
+      .find({ _id: { $in: favorites }, active: true })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
@@ -91,8 +91,14 @@ export class PostService {
       }) // select username, name, lastname and picture field
       .select('-comments._id'); // exclude _id field from comments
 
+    const postsWithFavoriteAndLikeFlag = posts.map((post) => {
+      const isFavorite = favorites.includes(post._id);
+      const isLiked = post.likes.some((like) => like._id.equals(userId));
+      return { ...post.toObject(), isFavorite, isLiked };
+    });
+
     return {
-      data: posts,
+      data: postsWithFavoriteAndLikeFlag,
       pagination: {
         count,
         page,
