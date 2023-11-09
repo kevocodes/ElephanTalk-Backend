@@ -118,8 +118,7 @@ export class PostService {
       .populate({
         path: 'comments.user',
         select: 'username name lastname picture',
-      }) // select username, name, lastname and picture field
-      .select('-comments._id'); // exclude _id field from comments;
+      }); // select username, name, lastname and picture field
 
     if (!post) {
       throw new NotFoundException('Post not found.');
