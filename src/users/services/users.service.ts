@@ -74,6 +74,16 @@ export class UsersService {
     return this.userModel.find();
   }
 
+  async findOwnProfile(id: Types.ObjectId) {
+    const user = await this.findOneById(id);
+
+    return {
+      _id: user._id,
+      username: user.username,
+      picture: user.picture,
+    };
+  }
+
   async deleteOneById(id: Types.ObjectId) {
     await this.findOneById(id);
 
