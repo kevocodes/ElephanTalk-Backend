@@ -81,6 +81,8 @@ export class UsersService {
       _id: user._id,
       username: user.username,
       picture: user.picture,
+      name: user.name,
+      lastname: user.lastname,
     };
   }
 
