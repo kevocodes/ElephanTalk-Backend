@@ -35,6 +35,18 @@ export class AuthController {
   }
 
   /**
+   * Login with admin credentials
+   */
+  @ApiBody({ type: AuthInfoDto, examples: loginExamples })
+  @ApiCreatedResponse({ description: 'Admin logged in' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+  @UseGuards(AuthGuard('local-admin'))
+  @Post('login/admin')
+  loginAdmin(@Req() req: Request) {
+    return req.user;
+  }
+
+  /**
    * Register a new user
    */
   @ApiCreatedResponse({ description: 'User registered' })

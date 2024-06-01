@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { UserDocument } from 'src/users/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from '../models/token.model';
+import { Role } from 'src/common/models/roles.model';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,26 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      return null;
+    }
+
+    const token = await this.generateToken(user);
+
+    return token;
+  }
+
+  async validateAdmin(usernameOrEmail: string, password: string) {
+    const user = await this.userService.findOneByUsernameOrEmail(
+      usernameOrEmail,
+    );
+
+    if (!user) {
+      return null;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch || user.role !== Role.ADMIN) {
       return null;
     }
 
