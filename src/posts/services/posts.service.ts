@@ -43,12 +43,7 @@ export class PostService {
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
       .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
-      .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
-      .populate({
-        path: 'comments.user',
-        select: 'username name lastname picture',
-      }) // username, name, lastname and picture field
-      .select('-comments._id'); // exclude _id field from comments
+      .populate('likes', 'username name lastname picture'); // select username, name, lastname and picture field
 
     const postsWithFavoriteAndLikeFlag = posts.map((post) => {
       const isFavorite = favorites.includes(post._id);
@@ -85,12 +80,7 @@ export class PostService {
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
       .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
-      .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
-      .populate({
-        path: 'comments.user',
-        select: 'username name lastname picture',
-      }) // select username, name, lastname and picture field
-      .select('-comments._id'); // exclude _id field from comments
+      .populate('likes', 'username name lastname picture'); // select username, name, lastname and picture field
 
     const postsWithFavoriteAndLikeFlag = posts.map((post) => {
       const isFavorite = favorites.includes(post._id);
@@ -117,9 +107,13 @@ export class PostService {
       .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
       .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
       .populate({
-        path: 'comments.user',
-        select: 'username name lastname picture',
-      }); // select username, name, lastname and picture field
+        path: 'comments',
+        select: 'content user',
+        populate: {
+          path: 'user',
+          select: 'username name lastname picture',
+        },
+      });
 
     if (!post) {
       throw new NotFoundException('Post not found.');
@@ -202,9 +196,25 @@ export class PostService {
     userId: Types.ObjectId,
     comment: CommentPostDto,
   ) {
-    await this.findOneById(id, userId);
+    const post = await this.postModel.findById(id);
 
-    return this.commentModel.create({ ...comment, user: userId, post: id });
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+
+    const newComment = new this.commentModel({
+      ...comment,
+      post: id,
+      user: userId,
+    });
+
+    await newComment.save();
+
+    post.comments.push(newComment._id);
+
+    await post.save();
+
+    return newComment;
   }
 
   async toggleFavorite(userId: Types.ObjectId, postId: Types.ObjectId) {
