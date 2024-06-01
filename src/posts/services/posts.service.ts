@@ -7,14 +7,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post } from '../schemas/post.schema';
 import { CommentPostDto, CreatePostDto, UpdatePostDto } from '../dtos/post.dto';
 import { FilterQuery, Model, Types } from 'mongoose';
-import { Comment } from '../models/comment.model';
 import { UsersService } from 'src/users/services/users.service';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
+import { Comment } from '../schemas/comment.schema';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
+    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     private readonly usersService: UsersService,
   ) {}
 
@@ -203,15 +204,7 @@ export class PostService {
   ) {
     await this.findOneById(id, userId);
 
-    const newComment: Comment = {
-      content: comment.content,
-      user: userId,
-      createdAt: new Date(),
-    };
-
-    return this.postModel
-      .findByIdAndUpdate(id, { $push: { comments: newComment } }, { new: true })
-      .select('comments -_id');
+    return this.commentModel.create({ ...comment, user: userId, post: id });
   }
 
   async toggleFavorite(userId: Types.ObjectId, postId: Types.ObjectId) {
