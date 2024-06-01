@@ -16,9 +16,6 @@ export class Report {
   @Prop({ required: true })
   reportedElementId: string;
 
-  @Prop({ type: Date })
-  revisionDate?: Date;
-
   @Prop({ required: true, enum: ReportType })
   type: ReportType;
 
@@ -28,8 +25,11 @@ export class Report {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  reviewer: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+  reviewer?: Types.ObjectId;
+
+  @Prop({ type: Date, default: null })
+  revisionDate?: Date;
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);

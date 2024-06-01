@@ -1,18 +1,38 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { ToxicityReportsService } from '../services/toxicity-reports.service';
-import { CreateToxicityReportDto } from '../dtos/toxicityReport.dto';
+import {
+  CreateToxicityReportDto,
+  DecideToxicityReportDto,
+} from '../dtos/toxicityReport.dto';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
+import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
+import { Types } from 'mongoose';
+import { RequestUser } from 'src/common/models/requestUser.model';
+import { Request } from 'express';
+import { Role } from 'src/common/models/roles.model';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('toxicity-reports')
 @ApiBearerAuth()
@@ -42,10 +62,61 @@ export class ToxicityReportsController {
    */
   @ApiOkResponse({ description: 'Toxicity reports found' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
-  @Get()
+  @Roles(Role.ADMIN)
+  @Get('history')
   async getHistory(@Query() query: PaginationParamsDto) {
     return {
       data: await this.toxicityReportsService.findAll(query),
+    };
+  }
+
+  /**
+   * Find all pending toxicity reports
+   */
+  @ApiOkResponse({ description: 'Pending toxicity reports found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @Roles(Role.ADMIN)
+  @Get('monitor')
+  async getMonitor(@Query() query: PaginationParamsDto) {
+    return {
+      data: await this.toxicityReportsService.findPending(query),
+    };
+  }
+
+  /**
+   * Find a toxicity report by id
+   */
+  @ApiOkResponse({ description: 'Toxicity report found' })
+  @ApiNotFoundResponse({ description: 'Toxicity report not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
+  @Roles(Role.ADMIN)
+  @Get(':id')
+  async findById(@Param('id', MongoIdPipe) id: Types.ObjectId) {
+    return {
+      data: await this.toxicityReportsService.findOneById(id),
+    };
+  }
+
+  /**
+   * Take action on a toxicity report
+   */
+  @ApiOkResponse({ description: 'Action taken' })
+  @ApiNotFoundResponse({ description: 'Toxicity report not found' })
+  @ApiConflictResponse({ description: 'Report already decided' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiParam({ name: 'id', type: String })
+  @Roles(Role.ADMIN)
+  @Patch(':id/decide')
+  async decide(
+    @Req() req: Request,
+    @Param('id', MongoIdPipe) reportId: Types.ObjectId,
+    @Body() data: DecideToxicityReportDto,
+  ) {
+    const { id } = req.user as RequestUser;
+
+    return {
+      data: await this.toxicityReportsService.decide(reportId, id, data),
     };
   }
 }

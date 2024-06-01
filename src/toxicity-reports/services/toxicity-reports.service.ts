@@ -6,11 +6,15 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Report } from '../schemas/report.schema';
 import { Model, Types } from 'mongoose';
-import { CreateToxicityReportDto } from '../dtos/toxicityReport.dto';
+import {
+  CreateToxicityReportDto,
+  DecideToxicityReportDto,
+} from '../dtos/toxicityReport.dto';
 import { ReportType } from '../models/report-type.model';
 import { Post } from 'src/posts/schemas/post.schema';
 import { Comment } from 'src/posts/schemas/comment.schema';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
+import { ReportStatus } from '../models/report-status.model';
 
 @Injectable()
 export class ToxicityReportsService {
@@ -90,5 +94,72 @@ export class ToxicityReportsService {
         limit,
       },
     };
+  }
+
+  async findPending(paginationParams: PaginationParamsDto) {
+    const { limit = 20, page = 1 } = paginationParams;
+
+    const skip = limit * (page - 1);
+    const count = await this.reportModel.count({
+      status: ReportStatus.PENDING,
+    });
+    const pages = Math.ceil(count / limit);
+
+    const reports = await this.reportModel
+      .find({ status: ReportStatus.PENDING })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }) // sort by createdAt in descending order
+      .populate('user', 'username name lastname picture'); // select username, name, lastname and picture field
+
+    return {
+      reports,
+      pagination: {
+        count,
+        page,
+        pages,
+        limit,
+      },
+    };
+  }
+
+  async findOneById(id: Types.ObjectId) {
+    const report = await this.reportModel
+      .findOne({ _id: id })
+      .populate('user', 'username name lastname picture'); // select username, name, lastname and picture field
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    return report;
+  }
+
+  async decide(
+    reportId: Types.ObjectId,
+    userId: Types.ObjectId,
+    data: DecideToxicityReportDto,
+  ) {
+    const report = await this.reportModel.findOne({ _id: reportId });
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    if (report.status !== ReportStatus.PENDING) {
+      throw new ConflictException('Report already decided');
+    }
+
+    return await this.reportModel.findByIdAndUpdate(
+      reportId,
+      {
+        $set: {
+          status: data.status,
+          reviewer: userId,
+          revisionDate: new Date(),
+        },
+      },
+      { new: true },
+    );
   }
 }
