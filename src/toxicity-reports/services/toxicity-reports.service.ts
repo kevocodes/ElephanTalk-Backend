@@ -83,7 +83,8 @@ export class ToxicityReportsService {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }) // sort by createdAt in descending order
-      .populate('user', 'username name lastname picture'); // select username, name, lastname and picture field
+      .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate('reviewer', 'username name lastname picture'); // select username, name, lastname and picture field
 
     return {
       reports,
@@ -126,7 +127,8 @@ export class ToxicityReportsService {
   async findOneById(id: Types.ObjectId) {
     const report = await this.reportModel
       .findOne({ _id: id })
-      .populate('user', 'username name lastname picture'); // select username, name, lastname and picture field
+      .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
+      .populate('reviewer', 'username name lastname picture'); // select username, name, lastname and picture field
 
     if (!report) {
       throw new NotFoundException('Report not found');
