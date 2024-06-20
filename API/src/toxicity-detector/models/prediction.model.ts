@@ -1,4 +1,8 @@
-export interface ToxicityClassificationResult {
+export interface ToxicityClassificationResponse {
+  results: ToxicityClassificationTags;
+}
+
+export interface ToxicityClassificationTags {
   toxicity: number;
   severe_toxicity: number;
   obscene: number;
@@ -6,4 +10,9 @@ export interface ToxicityClassificationResult {
   insult: number;
   threat: number;
   sexual_explicit: number;
+}
+
+export interface ToxicityClassificationResult {
+  isToxic: boolean;
+  tags: string[];
 }

@@ -7,7 +7,11 @@ import {
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import appConfig from 'src/config/app.config';
-import { ToxicityClassificationResult } from '../models/prediction.model';
+import {
+  ToxicityClassificationResponse,
+  ToxicityClassificationResult,
+  ToxicityClassificationTags,
+} from '../models/prediction.model';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 
@@ -26,7 +30,7 @@ export class ToxicityDetectorService {
   ): Promise<ToxicityClassificationResult> {
     const { data } = await firstValueFrom(
       this.httpService
-        .post<ToxicityClassificationResult>(
+        .post<ToxicityClassificationResponse>(
           `${this.config.toxicity.url}/moderate`,
           {
             content: text,
@@ -47,6 +51,55 @@ export class ToxicityDetectorService {
         ),
     );
 
-    return data;
+    return this.getToxicityResponse(data.results);
+  }
+
+  getToxicityResponse(
+    response: ToxicityClassificationTags,
+  ): ToxicityClassificationResult {
+    const {
+      toxicity,
+      severe_toxicity,
+      obscene,
+      identity_attack,
+      insult,
+      threat,
+      sexual_explicit,
+    } = response;
+
+    const tags = [];
+
+    if (toxicity > this.config.toxicity.threshold) {
+      tags.push('toxicity');
+    }
+
+    if (severe_toxicity > this.config.toxicity.threshold) {
+      tags.push('severe_toxicity');
+    }
+
+    if (obscene > this.config.toxicity.threshold) {
+      tags.push('obscene');
+    }
+
+    if (identity_attack > this.config.toxicity.threshold) {
+      tags.push('identity_attack');
+    }
+
+    if (insult > this.config.toxicity.threshold) {
+      tags.push('insult');
+    }
+
+    if (threat > this.config.toxicity.threshold) {
+      tags.push('threat');
+    }
+
+    if (sexual_explicit > this.config.toxicity.threshold) {
+      tags.push('sexual_explicit');
+    }
+
+    return {
+      isToxic: tags.length > 0,
+      tags,
+    };
   }
 }

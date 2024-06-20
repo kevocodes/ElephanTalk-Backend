@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,6 +11,7 @@ import { FilterQuery, Model, Types } from 'mongoose';
 import { UsersService } from 'src/users/services/users.service';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
 import { Comment } from '../schemas/comment.schema';
+import { ToxicityDetectorService } from 'src/toxicity-detector/services/toxicity-detector.service';
 
 @Injectable()
 export class PostService {
@@ -17,9 +19,17 @@ export class PostService {
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     private readonly usersService: UsersService,
+    private readonly toxicityDetectorService: ToxicityDetectorService,
   ) {}
 
   async create(id: Types.ObjectId, data: CreatePostDto) {
+    const results =
+      await this.toxicityDetectorService.getToxicityClassification(
+        data.description,
+      );
+
+    if (results.isToxic) throw new NotAcceptableException(results.tags);
+
     const newPost = new this.postModel({ ...data, user: id });
     return await newPost.save();
   }

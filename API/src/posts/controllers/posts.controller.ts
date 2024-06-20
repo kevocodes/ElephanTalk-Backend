@@ -24,6 +24,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNotAcceptableResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
@@ -46,6 +47,7 @@ export class PostController {
    */
   @ApiCreatedResponse({ description: 'Post created' })
   @ApiBadRequestResponse({ description: 'Invalid create data' })
+  @ApiNotAcceptableResponse({ description: 'Post is toxic' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Post()
   async create(@Body() body: CreatePostDto, @Req() req: Request) {

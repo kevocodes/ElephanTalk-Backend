@@ -9,5 +9,6 @@ export default registerAs('config', () => ({
   },
   toxicity: {
     url: process.env.TOXICITY_URL,
+    threshold: parseFloat(process.env.TOXICITY_THRESHOLD),
   },
 }));

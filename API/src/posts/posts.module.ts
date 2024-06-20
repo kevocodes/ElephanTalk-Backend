@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './schemas/post.schema';
 import { UsersModule } from 'src/users/users.module';
 import { Comment, CommentSchema } from './schemas/comment.schema';
+import { ToxicityDetectorModule } from 'src/toxicity-detector/toxicity-detector.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Comment, CommentSchema } from './schemas/comment.schema';
       { name: Comment.name, schema: CommentSchema },
     ]),
     UsersModule,
+    ToxicityDetectorModule,
   ],
   controllers: [PostController],
   providers: [PostService],

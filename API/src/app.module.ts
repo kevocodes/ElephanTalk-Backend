@@ -19,6 +19,7 @@ import appConfig from 'src/config/app.config';
         PORT: Joi.number().optional(),
         JWT_SECRET: Joi.string().required(),
         TOXICITY_URL: Joi.string().required(),
+        TOXICITY_THRESHOLD: Joi.number().required(),
       }),
     }),
     DatabaseModule,
