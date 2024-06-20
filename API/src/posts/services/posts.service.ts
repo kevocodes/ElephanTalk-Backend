@@ -212,6 +212,13 @@ export class PostService {
       throw new NotFoundException('Post not found.');
     }
 
+    const results =
+      await this.toxicityDetectorService.getToxicityClassification(
+        comment.content,
+      );
+
+    if (results.isToxic) throw new NotAcceptableException(results.tags);
+
     const newComment = new this.commentModel({
       ...comment,
       post: id,
