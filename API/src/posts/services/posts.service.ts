@@ -150,6 +150,13 @@ export class PostService {
       throw new ForbiddenException('Forbidden to update this post.');
     }
 
+    const results =
+      await this.toxicityDetectorService.getToxicityClassification(
+        changes.description,
+      );
+
+    if (results.isToxic) throw new NotAcceptableException(results.tags);
+
     const updatedPost = this.postModel
       .findByIdAndUpdate(id, { $set: changes }, { new: true })
       .select('title description image updatedAt -_id');
