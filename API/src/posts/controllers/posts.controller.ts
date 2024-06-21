@@ -24,6 +24,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNotAcceptableResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
@@ -46,6 +47,7 @@ export class PostController {
    */
   @ApiCreatedResponse({ description: 'Post created' })
   @ApiBadRequestResponse({ description: 'Invalid create data' })
+  @ApiNotAcceptableResponse({ description: 'Post is toxic' })
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Post()
   async create(@Body() body: CreatePostDto, @Req() req: Request) {
@@ -231,6 +233,26 @@ export class PostController {
 
     return {
       data: await this.postService.addComment(id, user.id, comment),
+    };
+  }
+
+  /**
+   * Delete a comment from a post
+   */
+  @ApiOkResponse({ description: 'Comment deleted' })
+  @ApiNotFoundResponse({ description: 'Searched post or comment not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiParam({ name: 'id', type: String })
+  @Delete(':id/comment')
+  async deleteComment(
+    @Req() req: Request,
+    @Param('id', MongoIdPipe) id: Types.ObjectId,
+  ) {
+    const user = req.user as RequestUser;
+
+    return {
+      data: await this.postService.deleteComment(id, user.id),
     };
   }
 

@@ -7,4 +7,8 @@ export default registerAs('config', () => ({
   jwt: {
     secret: process.env.JWT_SECRET,
   },
+  toxicity: {
+    url: process.env.TOXICITY_URL,
+    threshold: parseFloat(process.env.TOXICITY_THRESHOLD),
+  },
 }));

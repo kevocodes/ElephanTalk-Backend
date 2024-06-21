@@ -18,6 +18,8 @@ import appConfig from 'src/config/app.config';
         MONGO_URI: Joi.string().required(),
         PORT: Joi.number().optional(),
         JWT_SECRET: Joi.string().required(),
+        TOXICITY_URL: Joi.string().required(),
+        TOXICITY_THRESHOLD: Joi.number().required(),
       }),
     }),
     DatabaseModule,

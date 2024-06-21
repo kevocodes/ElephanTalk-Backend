@@ -14,7 +14,10 @@ import { ReportType } from '../models/report-type.model';
 import { Post } from 'src/posts/schemas/post.schema';
 import { Comment } from 'src/posts/schemas/comment.schema';
 import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
-import { ReportStatus } from '../models/report-status.model';
+import {
+  ReportDecideAction,
+  ReportStatus,
+} from '../models/report-status.model';
 
 @Injectable()
 export class ToxicityReportsService {
@@ -28,8 +31,10 @@ export class ToxicityReportsService {
     let userId: Types.ObjectId;
     let content: string;
 
+    // Check if the comment or post has an pending report
     const report = await this.reportModel.findOne({
       reportedElementId: data.reportedElementId,
+      status: ReportStatus.PENDING,
     });
 
     if (report) {
@@ -152,6 +157,31 @@ export class ToxicityReportsService {
       throw new ConflictException('Report already decided');
     }
 
+    // Delete reported element if the report is accepted as toxic
+    if (data.status === ReportDecideAction.ACCEPTED) {
+      if (report.type === ReportType.POST) {
+        await this.postModel.findByIdAndDelete(report.reportedElementId);
+      }
+
+      if (report.type === ReportType.COMMENT) {
+        await this.commentModel.findByIdAndDelete(report.reportedElementId);
+      }
+    }
+
+    // Update reported element status to avoid further reports
+    if (report.type === ReportType.POST) {
+      await this.postModel.findByIdAndUpdate(report.reportedElementId, {
+        $set: { manualReviewed: true },
+      });
+    }
+
+    if (report.type === ReportType.COMMENT) {
+      await this.commentModel.findByIdAndUpdate(report.reportedElementId, {
+        $set: { manualReviewed: true },
+      });
+    }
+
+    // Update report status and reviewer
     return await this.reportModel.findByIdAndUpdate(
       reportId,
       {
