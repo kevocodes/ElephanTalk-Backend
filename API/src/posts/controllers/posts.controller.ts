@@ -237,6 +237,26 @@ export class PostController {
   }
 
   /**
+   * Delete a comment from a post
+   */
+  @ApiOkResponse({ description: 'Comment deleted' })
+  @ApiNotFoundResponse({ description: 'Searched post or comment not found' })
+  @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
+  @ApiForbiddenResponse({ description: "User doesn't have permissions" })
+  @ApiParam({ name: 'id', type: String })
+  @Delete(':id/comment')
+  async deleteComment(
+    @Req() req: Request,
+    @Param('id', MongoIdPipe) id: Types.ObjectId,
+  ) {
+    const user = req.user as RequestUser;
+
+    return {
+      data: await this.postService.deleteComment(id, user.id),
+    };
+  }
+
+  /**
    * Add or remove a post from favorites
    */
   @ApiOkResponse({ description: 'Post commented' })

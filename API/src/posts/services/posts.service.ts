@@ -163,7 +163,7 @@ export class PostService {
         {
           $set: {
             manualReviewed: false,
-            ...changes
+            ...changes,
           },
         },
         { new: true },
@@ -248,6 +248,33 @@ export class PostService {
     await post.save();
 
     return newComment;
+  }
+
+  async deleteComment(commentId: Types.ObjectId, userId: Types.ObjectId) {
+    const comment = await this.commentModel
+      .findOne({ _id: commentId })
+      .populate('user', '_id')
+      .populate('post', '_id');
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found.');
+    }
+
+    if (!comment.user._id.equals(userId)) {
+      throw new ForbiddenException('Forbidden to delete this comment.');
+    }
+
+    const post = await this.postModel.findById(comment.post._id);
+
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+
+    post.comments = post.comments.filter((id) => !id.equals(commentId));
+
+    await post.save();
+
+    return this.commentModel.deleteOne({ _id: commentId });
   }
 
   async toggleFavorite(userId: Types.ObjectId, postId: Types.ObjectId) {
