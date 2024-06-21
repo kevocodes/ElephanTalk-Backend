@@ -118,7 +118,7 @@ export class PostService {
       .populate('likes', 'username name lastname picture') // select username, name, lastname and picture field
       .populate({
         path: 'comments',
-        select: 'content user',
+        select: 'content user manualReviewed',
         populate: {
           path: 'user',
           select: 'username name lastname picture',
