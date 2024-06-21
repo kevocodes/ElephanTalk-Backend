@@ -14,6 +14,9 @@ export class Post {
   @Prop({ default: true })
   active: boolean;
 
+  @Prop({ default: false })
+  manualReviewed: boolean;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user: Types.ObjectId;
 
