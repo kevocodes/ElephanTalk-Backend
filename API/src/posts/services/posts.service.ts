@@ -158,7 +158,16 @@ export class PostService {
     if (results.isToxic) throw new NotAcceptableException(results.tags);
 
     const updatedPost = this.postModel
-      .findByIdAndUpdate(id, { $set: changes }, { new: true })
+      .findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            manualReviewed: false,
+            ...changes
+          },
+        },
+        { new: true },
+      )
       .select('title description image updatedAt -_id');
 
     return updatedPost;

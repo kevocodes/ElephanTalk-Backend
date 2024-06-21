@@ -31,8 +31,10 @@ export class ToxicityReportsService {
     let userId: Types.ObjectId;
     let content: string;
 
+    // Check if the comment or post has an pending report
     const report = await this.reportModel.findOne({
       reportedElementId: data.reportedElementId,
+      status: ReportStatus.PENDING,
     });
 
     if (report) {
