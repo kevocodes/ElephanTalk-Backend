@@ -9,15 +9,16 @@ import { Model, Types } from 'mongoose';
 import {
   CreateToxicityReportDto,
   DecideToxicityReportDto,
+  GetToxicityReportsQueryDto,
 } from '../dtos/toxicityReport.dto';
 import { ReportType } from '../models/report-type.model';
 import { Post } from 'src/posts/schemas/post.schema';
 import { Comment } from 'src/posts/schemas/comment.schema';
-import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
 import {
   ReportDecideAction,
   ReportStatus,
 } from '../models/report-status.model';
+import { OrderType } from 'src/common/models/order.model';
 
 @Injectable()
 export class ToxicityReportsService {
@@ -76,18 +77,24 @@ export class ToxicityReportsService {
     return await newReport.save();
   }
 
-  async findAll(paginationParams: PaginationParamsDto) {
-    const { limit = 20, page = 1 } = paginationParams;
+  async findAll(paginationParams: GetToxicityReportsQueryDto) {
+    const {
+      limit = 20,
+      page = 1,
+      order = OrderType.DESC,
+      type,
+    } = paginationParams;
 
     const skip = limit * (page - 1);
-    const count = await this.reportModel.count();
+    const count = await this.reportModel.countDocuments(type ? { type } : {});
     const pages = Math.ceil(count / limit);
 
     const reports = await this.reportModel
       .find()
+      .where(type ? { type } : {})
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }) // sort by createdAt in descending order
+      .sort({ createdAt: order }) // sort by createdAt in descending order
       .populate('user', 'username name lastname picture') // select username, name, lastname and picture field
       .populate('reviewer', 'username name lastname picture'); // select username, name, lastname and picture field
 
@@ -102,20 +109,27 @@ export class ToxicityReportsService {
     };
   }
 
-  async findPending(paginationParams: PaginationParamsDto) {
-    const { limit = 20, page = 1 } = paginationParams;
+  async findPending(paginationParams: GetToxicityReportsQueryDto) {
+    const {
+      limit = 20,
+      page = 1,
+      order = OrderType.DESC,
+      type,
+    } = paginationParams;
 
     const skip = limit * (page - 1);
     const count = await this.reportModel.count({
       status: ReportStatus.PENDING,
+      ...(type ? { type } : {}),
     });
     const pages = Math.ceil(count / limit);
 
     const reports = await this.reportModel
       .find({ status: ReportStatus.PENDING })
+      .where(type ? { type } : {})
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }) // sort by createdAt in descending order
+      .sort({ createdAt: order }) // sort by createdAt in descending order
       .populate('user', 'username name lastname picture'); // select username, name, lastname and picture field
 
     return {
