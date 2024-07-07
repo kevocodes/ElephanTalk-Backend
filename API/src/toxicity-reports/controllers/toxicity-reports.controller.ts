@@ -25,8 +25,8 @@ import { ToxicityReportsService } from '../services/toxicity-reports.service';
 import {
   CreateToxicityReportDto,
   DecideToxicityReportDto,
+  GetToxicityReportsQueryDto,
 } from '../dtos/toxicityReport.dto';
-import { PaginationParamsDto } from 'src/common/dtos/paginationParams.dto';
 import { MongoIdPipe } from 'src/common/pipes/mongo/mongo-id.pipe';
 import { Types } from 'mongoose';
 import { RequestUser } from 'src/common/models/requestUser.model';
@@ -64,7 +64,7 @@ export class ToxicityReportsController {
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Roles(Role.ADMIN)
   @Get('history')
-  async getHistory(@Query() query: PaginationParamsDto) {
+  async getHistory(@Query() query: GetToxicityReportsQueryDto) {
     return {
       data: await this.toxicityReportsService.findAll(query),
     };
@@ -77,7 +77,7 @@ export class ToxicityReportsController {
   @ApiUnauthorizedResponse({ description: "User aren't authenticated" })
   @Roles(Role.ADMIN)
   @Get('monitor')
-  async getMonitor(@Query() query: PaginationParamsDto) {
+  async getMonitor(@Query() query: GetToxicityReportsQueryDto) {
     return {
       data: await this.toxicityReportsService.findPending(query),
     };
