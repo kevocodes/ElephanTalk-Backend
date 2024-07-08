@@ -1,91 +1,78 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# API - Monorepo Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Guía de Configuración y Uso de Docker para APIs de NestJS y FastAPI
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requisitos Previos
 
-## Description
+- Asegúrate de tener Docker instalado en tu máquina. Si necesitas instalar Docker, visita el sitio oficial de Docker para las instrucciones de instalación adecuadas para tu sistema operativo.
 
-This is the repository of the API for the social media platform for posts, developed using NestJS as the framework and MongoDB as the database.
+## Estructura del Proyecto
 
-## Documentation
-
-To access the documentation, go to the `/docs` route of the API.
-
-```url
-http://localhost:3000/docs
-```
-
-## Configuration
-Copy the `.env.example` file and rename it to `.env`.
-Make sure you have the following environment variables:
-```env
-# Mongo uri to connect to db
-MONGO_URI=""
-
-# API port (Optional, by default is 3000)
-PORT=0
-
-# Secret to sign JWT 
-JWT_SECRET=""
-```
-
-## Installation
+Tu proyecto debe tener la siguiente estructura:
 
 ```bash
-$ npm install
+/path/to/your/project
+├── docker-compose.yml
+├── API
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── .env
+│   └── ...
+└── MicroserviceModeration
+    ├── Dockerfile
+    ├── requirements.txt
+    ├── main.py
+    └── ...
 ```
 
-## Running the app
+## Configuración del Docker Compose
+
+El archivo `docker-compose.yml` está configurado para levantar tanto la API de NestJS como la de FastAPI en servicios separados. Asegúrate de estar en la raíz del repositorio antes de ejecutar los siguientes comandos.
+
+## Pasos para Construir y Ejecutar
+
+Construye y levanta los servicios usando Docker Compose:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose build
 ```
 
-## Test
+Luego para levantar los servicios
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up -d
 ```
 
-## Support
+## Comandos Útiles
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Para detener los servicios:
+docker-compose down
 
-## License
+- Para detener un contenedor específico:
 
-Nest is [MIT licensed](LICENSE).
+```bash
+docker stop <nombre-del-contenedor>
+```
 
+- Para iniciar un contenedor específico:
 
+```bash
+docker start <nombre-del-contenedor>
+```
+
+- Para reiniciar un contenedor específico:
+
+```bash
+docker restart <nombre-del-contenedor>
+```
+
+- Para ver los logs de un contenedor específico:
+
+```bash
+docker logs <nombre-del-contenedor>
+```
+
+## Notas Adicionales
+
+- Asegúrate de que los archivos `.env` necesarios estén correctamente configurados antes de construir las imágenes Docker.
+- Si necesitas conectarte a una base de datos, asegúrate de que los servicios estén en la misma red de Docker especificada en `docker-compose.yml`.
